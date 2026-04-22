@@ -137,8 +137,13 @@ def predict(interpreter, img_array: np.ndarray):
     interpreter.set_tensor(input_details[0]["index"], img_array)
     interpreter.invoke()
     output = interpreter.get_tensor(output_details[0]["index"])[0]
-    idx = int(np.argmax(output))
-    return CLASS_NAMES[idx], float(output[idx]), output
+    
+    # Apply softmax to convert logits to probabilities
+    exp_output = np.exp(output - np.max(output))  # Subtract max for numerical stability
+    probabilities = exp_output / np.sum(exp_output)
+    
+    idx = int(np.argmax(probabilities))
+    return CLASS_NAMES[idx], float(probabilities[idx]), probabilities
 
 
 # ── UI ────────────────────────────────────────────────────────────────────────
