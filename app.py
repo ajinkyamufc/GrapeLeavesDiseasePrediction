@@ -138,11 +138,26 @@ def predict(interpreter, img_array: np.ndarray):
     interpreter.invoke()
     output = interpreter.get_tensor(output_details[0]["index"])[0]
     
+    # Debug: print raw model output
+    print("=" * 60)
+    print("RAW MODEL OUTPUT (Logits):")
+    for i, name in enumerate(CLASS_NAMES):
+        print(f"  {name}: {output[i]:.6f}")
+    
     # Apply softmax to convert logits to probabilities
     exp_output = np.exp(output - np.max(output))  # Subtract max for numerical stability
     probabilities = exp_output / np.sum(exp_output)
     
+    # Debug: print probabilities after softmax
+    print("\nAFTER SOFTMAX (Probabilities):")
+    for i, name in enumerate(CLASS_NAMES):
+        print(f"  {name}: {probabilities[i]:.6f}")
+    
     idx = int(np.argmax(probabilities))
+    print(f"\nPREDICTED CLASS: {CLASS_NAMES[idx]} (Index: {idx})")
+    print(f"CONFIDENCE: {probabilities[idx]:.6f} ({probabilities[idx]*100:.2f}%)")
+    print("=" * 60)
+    
     return CLASS_NAMES[idx], float(probabilities[idx]), probabilities
 
 
